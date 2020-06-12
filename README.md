@@ -1,5 +1,10 @@
 # go-content-encoding
 
+[![ci](https://github.com/johejo/go-content-encoding/workflows/ci/badge.svg?branch=master)](https://github.com/johejo/go-content-encoding/actions?query=workflow%3Aci)
+[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/johejo/go-content-encoding)
+[![codecov](https://codecov.io/gh/johejo/go-content-encoding/branch/master/graph/badge.svg)](https://codecov.io/gh/johejo/go-content-encoding)
+[![Go Report Card](https://goreportcard.com/badge/github.com/johejo/go-content-encoding)](https://goreportcard.com/report/github.com/johejo/go-content-encoding)
+
 ## Description
 
 go-content-encoding provides net/http compatible middleware for HTTP Content-Encoding.<br>
