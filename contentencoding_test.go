@@ -1,4 +1,4 @@
-package middleware_test
+package contentencoding_test
 
 import (
 	"io/ioutil"
@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/johejo/go-content-encoding/middleware"
+	contentencoding "github.com/johejo/go-content-encoding"
 )
 
 func TestDecode_compress(t *testing.T) {
@@ -26,7 +26,7 @@ func TestDecode_compress(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mux := http.NewServeMux()
-			mux.Handle("/", middleware.Decode()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			mux.Handle("/", contentencoding.Decode()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				b, err := ioutil.ReadAll(r.Body)
 				if err != nil {
 					t.Fatal(err)
@@ -62,7 +62,7 @@ func TestDecode_compress(t *testing.T) {
 }
 
 func TestDecode_WithDecoder(t *testing.T) {
-	customDecoder := &middleware.Decoder{
+	customDecoder := &contentencoding.Decoder{
 		Encoding: "custom",
 		Handler: func(w http.ResponseWriter, r *http.Request) error {
 			b, err := ioutil.ReadAll(r.Body)
@@ -74,7 +74,7 @@ func TestDecode_WithDecoder(t *testing.T) {
 		},
 	}
 	mux := http.NewServeMux()
-	dm := middleware.Decode(middleware.WithDecoder(customDecoder))
+	dm := contentencoding.Decode(contentencoding.WithDecoder(customDecoder))
 	mux.Handle("/", dm(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		b, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -102,10 +102,10 @@ func TestDecode_WithDecoder(t *testing.T) {
 
 func TestDecode_WithErrorHandler(t *testing.T) {
 	mux := http.NewServeMux()
-	errHandler := middleware.ErrorHandler(func(w http.ResponseWriter, r *http.Request, err error) {
+	errHandler := contentencoding.ErrorHandler(func(w http.ResponseWriter, r *http.Request, err error) {
 		w.WriteHeader(999) // custom error code
 	})
-	dm := middleware.Decode(middleware.WithErrorHandler(errHandler))
+	dm := contentencoding.Decode(contentencoding.WithErrorHandler(errHandler))
 	mux.Handle("/", dm(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})))
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader("test")) // not compressed
@@ -125,7 +125,7 @@ func TestDecode_mergeAcceptEncoding(t *testing.T) {
 			next.ServeHTTP(w, r)
 		})
 	}
-	dm := middleware.Decode()
+	dm := contentencoding.Decode()
 	mux.Handle("/", outer(dm(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))))
 	rec := httptest.NewRecorder()
 	f, err := os.Open("testdata/test.txt.gz")

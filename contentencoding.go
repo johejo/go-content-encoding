@@ -1,7 +1,7 @@
-// Package middleware provides net/http compatible middleware for HTTP Content-Encoding.
+// Package contentencoding provides net/http compatible middleware for HTTP Content-Encoding.
 // It also provides the functionality to customize the decoder.
 // By default, br(brotli), gzip and zstd(zstandard) are supported.
-package middleware
+package contentencoding
 
 import (
 	"io/ioutil"

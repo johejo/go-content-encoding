@@ -1,4 +1,4 @@
-package middleware_test
+package contentencoding_test
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"strings"
 
-	"github.com/johejo/go-content-encoding/middleware"
+	contentencoding "github.com/johejo/go-content-encoding"
 )
 
 func ExampleDecode() {
@@ -21,12 +21,12 @@ func ExampleDecode() {
 	}
 
 	mux := http.NewServeMux()
-	decode := middleware.Decode()
+	decode := contentencoding.Decode()
 	mux.Handle("/", decode(http.HandlerFunc(handler)))
 }
 
 func ExampleWithDecoder() {
-	customDecoder := &middleware.Decoder{
+	customDecoder := &contentencoding.Decoder{
 		Encoding: "custom",
 		Handler: func(w http.ResponseWriter, r *http.Request) error {
 			b, err := ioutil.ReadAll(r.Body)
@@ -38,7 +38,7 @@ func ExampleWithDecoder() {
 		},
 	}
 	mux := http.NewServeMux()
-	dm := middleware.Decode(middleware.WithDecoder(customDecoder))
+	dm := contentencoding.Decode(contentencoding.WithDecoder(customDecoder))
 	mux.Handle("/", dm(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		b, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -57,10 +57,10 @@ func ExampleWithDecoder() {
 
 func ExampleWithErrorHandler() {
 	mux := http.NewServeMux()
-	errHandler := middleware.ErrorHandler(func(w http.ResponseWriter, r *http.Request, err error) {
+	errHandler := contentencoding.ErrorHandler(func(w http.ResponseWriter, r *http.Request, err error) {
 		w.WriteHeader(999) // custom error code
 	})
-	dm := middleware.Decode(middleware.WithErrorHandler(errHandler))
+	dm := contentencoding.Decode(contentencoding.WithErrorHandler(errHandler))
 	mux.Handle("/", dm(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})))
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader("test")) // not compressed
