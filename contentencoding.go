@@ -22,26 +22,6 @@ func Decode(opts ...Option) func(next http.Handler) http.Handler {
 	for _, opt := range append(defaults(), opts...) {
 		opt(cfg)
 	}
-	decompressBrotli := func(w http.ResponseWriter, r *http.Request) error {
-		r.Body = ioutil.NopCloser(brotli.NewReader(r.Body))
-		return nil
-	}
-	decompressGzip := func(w http.ResponseWriter, r *http.Request) error {
-		gr, err := gzip.NewReader(r.Body)
-		if err != nil {
-			return err
-		}
-		r.Body = gr
-		return nil
-	}
-	decompressZstd := func(w http.ResponseWriter, r *http.Request) error {
-		zr, err := zstd.NewReader(r.Body, cfg.dopts...)
-		if err != nil {
-			return err
-		}
-		r.Body = ioutil.NopCloser(zr)
-		return nil
-	}
 
 	encodings := []string{"br", "gzip", "zstd"}
 	for _, d := range cfg.decoders {
@@ -60,14 +40,14 @@ func Decode(opts ...Option) func(next http.Handler) http.Handler {
 				v := values[i]
 				switch v {
 				case "br":
-					_ = decompressBrotli(w, r)
+					decompressBrotli(w, r)
 				case "gzip", "x-gzip":
 					if err := decompressGzip(w, r); err != nil {
 						cfg.errHandler(w, r, err)
 						return
 					}
 				case "zstd":
-					if err := decompressZstd(w, r); err != nil {
+					if err := decompressZstd(w, r, cfg.dopts...); err != nil {
 						cfg.errHandler(w, r, err)
 						return
 					}
@@ -92,6 +72,28 @@ func Decode(opts ...Option) func(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func decompressBrotli(w http.ResponseWriter, r *http.Request) {
+	r.Body = ioutil.NopCloser(brotli.NewReader(r.Body))
+}
+
+func decompressGzip(w http.ResponseWriter, r *http.Request) error {
+	gr, err := gzip.NewReader(r.Body)
+	if err != nil {
+		return err
+	}
+	r.Body = gr
+	return nil
+}
+
+func decompressZstd(w http.ResponseWriter, r *http.Request, opts ...zstd.DOption) error {
+	zr, err := zstd.NewReader(r.Body, opts...)
+	if err != nil {
+		return err
+	}
+	r.Body = ioutil.NopCloser(zr)
+	return nil
 }
 
 var noSpace = strings.NewReplacer(" ", "")
