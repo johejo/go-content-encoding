@@ -1,5 +1,5 @@
-github.com/andybalholm/brotli v1.0.1-0.20200619015827-c3da72aa01ed h1:G/gj6aolvcaqMTCmlHRDsLLQlJ/fXTC4vE9o18KRZtw=
-github.com/andybalholm/brotli v1.0.1-0.20200619015827-c3da72aa01ed/go.mod h1:loMXtMfwqflxFJPmdbJO0a3KNoPuLBgiu3qAvBg8x/Y=
+github.com/andybalholm/brotli v1.0.1-0.20200717162447-1b06c5640cf6 h1:90N0TG672nbzADZ4IqH3LFCkwhR/qDCJeEKh3ErrwBU=
+github.com/andybalholm/brotli v1.0.1-0.20200717162447-1b06c5640cf6/go.mod h1:loMXtMfwqflxFJPmdbJO0a3KNoPuLBgiu3qAvBg8x/Y=
 github.com/fatih/set v0.2.1 h1:nn2CaJyknWE/6txyUDGwysr3G5QC6xWB/PtVjPBbeaA=
 github.com/fatih/set v0.2.1/go.mod h1:+RKtMCH+favT2+3YecHGxcc0b4KyVWA1QWWJUs4E0CI=
 github.com/klauspost/compress v1.10.10 h1:a/y8CglcM7gLGYmlbP/stPE5sR3hbhFRUjCBfd/0B3I=
