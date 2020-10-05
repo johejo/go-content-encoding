@@ -111,7 +111,7 @@ func mergeAcceptEncoding(raw string, adds []string) string {
 		return joinWithCommaSpace(adds)
 	}
 	set := strset.New(current...)
-	set.Merge(strset.New(adds...))
+	set.Add(adds...)
 	list := set.List()
 	sort.Strings(list)
 	return joinWithCommaSpace(list)
