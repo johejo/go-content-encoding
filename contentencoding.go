@@ -40,14 +40,14 @@ func Decode(opts ...Option) func(next http.Handler) http.Handler {
 				v := values[i]
 				switch v {
 				case "br":
-					decompressBrotli(w, r)
+					decompressBrotli(r)
 				case "gzip", "x-gzip":
-					if err := decompressGzip(w, r); err != nil {
+					if err := decompressGzip(r); err != nil {
 						cfg.errHandler(w, r, err)
 						return
 					}
 				case "zstd":
-					if err := decompressZstd(w, r, cfg.dopts...); err != nil {
+					if err := decompressZstd(r, cfg.dopts...); err != nil {
 						cfg.errHandler(w, r, err)
 						return
 					}
@@ -74,11 +74,11 @@ func Decode(opts ...Option) func(next http.Handler) http.Handler {
 	}
 }
 
-func decompressBrotli(w http.ResponseWriter, r *http.Request) {
+func decompressBrotli(r *http.Request) {
 	r.Body = ioutil.NopCloser(brotli.NewReader(r.Body))
 }
 
-func decompressGzip(w http.ResponseWriter, r *http.Request) error {
+func decompressGzip(r *http.Request) error {
 	gr, err := gzip.NewReader(r.Body)
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func decompressGzip(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func decompressZstd(w http.ResponseWriter, r *http.Request, opts ...zstd.DOption) error {
+func decompressZstd(r *http.Request, opts ...zstd.DOption) error {
 	zr, err := zstd.NewReader(r.Body, opts...)
 	if err != nil {
 		return err
