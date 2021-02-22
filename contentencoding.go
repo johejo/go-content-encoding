@@ -6,13 +6,11 @@ package contentencoding
 import (
 	"io/ioutil"
 	"net/http"
-	"sort"
 	"strings"
 
 	"github.com/andybalholm/brotli"
 	"github.com/klauspost/compress/gzip"
 	"github.com/klauspost/compress/zstd"
-	"github.com/scylladb/go-set/strset"
 )
 
 // Decode returns net/http compatible middleware that automatically decodes body detected by Content-Encoding.
@@ -22,12 +20,6 @@ func Decode(opts ...Option) func(next http.Handler) http.Handler {
 	for _, opt := range append(defaults(), opts...) {
 		opt(cfg)
 	}
-
-	encodings := []string{"br", "gzip", "zstd"}
-	for _, d := range cfg.decoders {
-		encodings = append(encodings, d.Encoding)
-	}
-	acceptEncoding := joinWithCommaSpace(encodings)
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -63,12 +55,6 @@ func Decode(opts ...Option) func(next http.Handler) http.Handler {
 					}
 				}
 			}
-			current := w.Header().Get("Accept-Encoding")
-			if current == "" {
-				w.Header().Set("Accept-Encoding", acceptEncoding)
-			} else {
-				w.Header().Set("Accept-Encoding", mergeAcceptEncoding(current, encodings))
-			}
 			next.ServeHTTP(w, r)
 		})
 	}
@@ -103,22 +89,6 @@ func splitEncodingHeader(raw string) []string {
 		return []string{}
 	}
 	return strings.Split(noSpace.Replace(raw), ",")
-}
-
-func mergeAcceptEncoding(raw string, adds []string) string {
-	current := splitEncodingHeader(raw)
-	if len(current) == 0 {
-		return joinWithCommaSpace(adds)
-	}
-	set := strset.New(current...)
-	set.Add(adds...)
-	list := set.List()
-	sort.Strings(list)
-	return joinWithCommaSpace(list)
-}
-
-func joinWithCommaSpace(ss []string) string {
-	return strings.Join(ss, ", ")
 }
 
 // Option is option for Decode.

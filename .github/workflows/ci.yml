@@ -7,19 +7,11 @@ on:
     branches:
       - master
 jobs:
-  golangci-lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.32
   test:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        go: ["1.14", "1.15"]
+        go: ["1.14", "1.15", "1.16"]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
@@ -27,6 +19,10 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
-      - run: |
+      - name: vet
+        run: |
+          go vet ./...
+      - name: test
+        run: |
           go test -cover -coverprofile coverage.txt -race -v ./...
       - uses: codecov/codecov-action@v1
