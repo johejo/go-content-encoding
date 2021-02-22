@@ -52,11 +52,6 @@ func TestDecode_compress(t *testing.T) {
 			if result.StatusCode != http.StatusOK {
 				t.Errorf("%v", result)
 			}
-			want := "br, gzip, zstd"
-			got := result.Header.Get("Accept-Encoding")
-			if want != got {
-				t.Errorf("invalid Accept-Encoding, want=%s, got=%s", want, got)
-			}
 		})
 	}
 }
@@ -93,11 +88,6 @@ func TestDecode_WithDecoder(t *testing.T) {
 	if result.StatusCode != http.StatusOK {
 		t.Errorf("%v", result)
 	}
-	want := "br, gzip, zstd, custom"
-	got := result.Header.Get("Accept-Encoding")
-	if want != got {
-		t.Errorf("invalid Accept-Encoding, want=%s, got=%s", want, got)
-	}
 }
 
 func TestDecode_WithErrorHandler(t *testing.T) {
@@ -113,31 +103,6 @@ func TestDecode_WithErrorHandler(t *testing.T) {
 	mux.ServeHTTP(rec, req)
 	result := rec.Result()
 	if result.StatusCode != 999 {
-		t.Errorf("invalid Accept-Encoding, %v", result)
-	}
-}
-
-func TestDecode_mergeAcceptEncoding(t *testing.T) {
-	mux := http.NewServeMux()
-	outer := func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Accept-Encoding", "gzip")
-			next.ServeHTTP(w, r)
-		})
-	}
-	dm := contentencoding.Decode()
-	mux.Handle("/", outer(dm(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))))
-	rec := httptest.NewRecorder()
-	f, err := os.Open("testdata/test.txt.gz")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { f.Close() })
-	req := httptest.NewRequest(http.MethodPost, "/", f) // not compressed
-	req.Header.Set("Content-Encoding", "gzip")
-	mux.ServeHTTP(rec, req)
-	result := rec.Result()
-	if result.Header.Get("Accept-Encoding") != "br, gzip, zstd" {
 		t.Errorf("invalid Accept-Encoding, %v", result)
 	}
 }
